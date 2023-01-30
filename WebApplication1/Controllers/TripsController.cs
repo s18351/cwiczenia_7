@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Model;
+using WebApplication1.Model.DTOs;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,15 +22,8 @@ namespace WebApplication1.Controllers
         public IActionResult GetTrips()
         {
             var trips = _context.Trips.OrderByDescending(a => a.DateFrom)
-                .Include(x => x.ClientTrips);
+                .Include(x => x.ClientTrips).ThenInclude(x=>x.IdClientNavigation);
             return Ok(trips.Select(x=> new TripInfoDTO(x)));
-        }
-
-        // GET api/<TripsController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
         }
 
         // POST api/<TripsController>
@@ -45,7 +39,7 @@ namespace WebApplication1.Controllers
         [HttpPost("{id}/clients")]
         public IActionResult AddClientToTrip(int id, [FromBody] AddClientToTripDTO addClientDTO)
         {
-            Trip? t = _context.Trips.SingleOrDefault(x => x.IdTrip == id);
+            Trip? t = _context.Trips.Include(x=>x.ClientTrips).SingleOrDefault(x => x.IdTrip == id);
 
             if(t == null)
             {
@@ -63,7 +57,6 @@ namespace WebApplication1.Controllers
             else
             {
                 _context.Clients.Add(addClientDTO);
-                _context.SaveChanges();
                 
                 c = addClientDTO;
             }

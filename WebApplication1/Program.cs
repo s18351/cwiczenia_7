@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using WebApplication1.Model;
 
@@ -13,16 +14,18 @@ namespace WebApplication1
             // Add services to the container.
 
             builder.Services.AddControllers()
-                .AddJsonOptions(conf =>
+                .AddNewtonsoftJson(opt =>
                 {
-                    conf.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+                    opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDbContext<S18351Context>(opt =>
             {
-                opt.UseSqlServer("Data Source=db-mssql16.pjwstk.edu.pl;Initial Catalog=s18351;Integrated Security=True;TrustServerCertificate=True");
+                opt
+                .LogTo(Console.WriteLine)
+                .UseSqlServer("Data Source=db-mssql16.pjwstk.edu.pl;Initial Catalog=s18351;Integrated Security=True;TrustServerCertificate=True");
             });
 
             var app = builder.Build();
